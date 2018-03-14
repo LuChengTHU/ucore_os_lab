@@ -309,7 +309,7 @@ print_stackframe(void) {
         cprintf("args:");
         int i;
         for (i = 0; i < 4; i++) {
-            cprintf("0x%x ", ebp + 2 + i);
+            cprintf("0x%x ", *((uintptr_t*)ebp + 2 + i));
         }
         cprintf("\n");
         print_debuginfo(eip - 1);
