@@ -373,7 +373,7 @@ get_pte(pde_t *pgdir, uintptr_t la, bool create) {
         if (!create) {      // (3) check if creating is needed, then alloc page for page table
             return NULL;    // CAUTION: this page is used for page table, not for common data page
         }
-        struct *Page page = alloc_page();
+        struct Page *page = alloc_page();
         if (page == NULL) {
             return NULL;
         }
