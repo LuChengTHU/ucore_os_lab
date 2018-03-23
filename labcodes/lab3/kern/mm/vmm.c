@@ -366,7 +366,7 @@ do_pgfault(struct mm_struct *mm, uint32_t error_code, uintptr_t addr) {
     */
 
     /*LAB3 EXERCISE 1: YOUR CODE*/
-    ptep = get_pte(mm->pgdir, addr, true);             //(1) try to find a pte, if pte's PT(Page Table) isn't existed, then create a PT.
+    ptep = get_pte(mm->pgdir, addr, 1);             //(1) try to find a pte, if pte's PT(Page Table) isn't existed, then create a PT.
     if (ptep == NULL) {
         cprintf("Cannot allocate a page of page table in do_pgfault!\n");
         goto failed;
@@ -398,7 +398,7 @@ do_pgfault(struct mm_struct *mm, uint32_t error_code, uintptr_t addr) {
                 //    into the memory which page managed.
             page_insert(mm->pgdir, page, addr, perm);   //(2) According to the mm, addr AND page, setup the map of phy addr <---> logical addr
             page->pra_vaddr = addr;
-            swap_map_swappable(m, addr, page, 1);   //(3) make the page swappable.
+            swap_map_swappable(mm, addr, page, 1);   //(3) make the page swappable.
         }
         else {
             cprintf("no swap_init_ok but ptep is %x, failed\n",*ptep);
