@@ -44,7 +44,7 @@ _exclock_swap_out_victim(struct mm_struct *mm, struct Page ** ptr_page, int in_t
     assert(pra_list_clock_head != NULL);
     assert(in_tick==0);
     /* Select the victim */
-    list_entry_t*& le = pra_list_clock_head;
+    list_entry_t& *le = pra_list_clock_head;
     assert(le != mm->sm_priv);
     while (1) {
         if (le == mm->sm_priv) le = list_next(le);
