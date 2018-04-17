@@ -67,7 +67,7 @@ _fifo_swap_out_victim(struct mm_struct *mm, struct Page ** ptr_page, int in_tick
     /* Select the victim */
     /*LAB3 EXERCISE 2: YOUR CODE*/
 
-    list_entry_t *le = head->next;
+    list_entry_t *le = list_next(head);
     assert(le != head);
     while (1) {
         if (le == head) le = list_next(le);
@@ -87,7 +87,7 @@ _fifo_swap_out_victim(struct mm_struct *mm, struct Page ** ptr_page, int in_tick
                 cprintf("CLOCK_EXTENDED WRITE: failed to save\n");
             }
             tlb_invalidate(mm->pgdir, va);
-        } else if ( (*ptep & PTE_A) && !(*ptep & PTE_D) ) {
+        } else if ( (*ptep & PTE_A) ) {
             *ptep &= ~PTE_A;
             tlb_invalidate(mm->pgdir, va);
         }
