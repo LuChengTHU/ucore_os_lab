@@ -86,7 +86,7 @@ _fifo_swap_out_victim(struct mm_struct *mm, struct Page ** ptr_page, int in_tick
             if (swapfs_write( (va/PGSIZE+1)<<8, page) != 0) {
                 cprintf("CLOCK_EXTENDED WRITE: failed to save\n");
             } else {
-                cprintf("CLOCK_EXTENDED WRITE: i %d, store page in vaddr 0x%x to disk swap entry %d\n", i, va, va/PGSIZE+1);
+                cprintf("CLOCK_EXTENDED WRITE: store page in vaddr 0x%x to disk swap entry %d\n", va, va/PGSIZE+1);
             }
             tlb_invalidate(mm->pgdir, va);
         } else if ( (*ptep & PTE_A) ) {
