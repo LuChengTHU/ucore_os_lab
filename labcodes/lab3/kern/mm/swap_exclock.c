@@ -54,7 +54,7 @@ _exclock_swap_out_victim(struct mm_struct *mm, struct Page ** ptr_page, int in_t
         assert((*ptep & PTE_P) != 0);
         if ( !(*ptep & PTE_A) && !(*ptep & PTE_D) ) {
             list_entry_t *next = list_next(clock_head);
-            if (next == mm->sm_priv) next = list_next(next);
+            if (next == mm->sm_priv && list_prev(clock_head) != mm->sm_priv) next = list_next(next);
             list_del(clock_head);
             clock_head = next;
             assert(page != NULL);
@@ -79,6 +79,7 @@ _exclock_swap_out_victim(struct mm_struct *mm, struct Page ** ptr_page, int in_t
 
 static int
 _exclock_check_swap(void) {
+    // page_A_D, eg:e11 means Page e, Acessed 1, Dirty 1.
     cprintf("write Virt Page c in exclock_check_swap\n");
     *(unsigned char *)0x3000 = 0x0c;
     assert(pgfault_num==4);
@@ -93,28 +94,28 @@ _exclock_check_swap(void) {
     assert(pgfault_num==4);
     cprintf("write Virt Page e in exclock_check_swap\n");
     *(unsigned char *)0x5000 = 0x0e;
-    assert(pgfault_num==5);    // 00:AW, e11^b00c00d00
+    assert(pgfault_num==5);    // e11^b00c00d00
     cprintf("read Virt Page b in exclock_check_swap\n");
     assert(*(unsigned char *)0x2000 == 0x0b);
-    assert(pgfault_num==5);    // 00:AW, e11^b10c00d00
+    assert(pgfault_num==5);    // e11^b10c00d00
     cprintf("write Virt Page a in exclock_check_swap\n");
     *(unsigned char *)0x1000 = 0x0a;
-    assert(pgfault_num==6);    // 00:AW, e11b00a11^d00
+    assert(pgfault_num==6);    // e11b00a11^d00
     cprintf("read Virt Page b in exclock_check_swap\n");
     assert(*(unsigned char *)0x2000 == 0x0b);
-    assert(pgfault_num==6);    // 00:AW, e11b10a11^d00
+    assert(pgfault_num==6);    // e11b10a11^d00
     cprintf("write Virt Page c in exclock_check_swap\n");
     *(unsigned char *)0x3000 = 0x0c;
-    assert(pgfault_num==7);    // 00:AW, ^e11b10a11c11
+    assert(pgfault_num==7);    // ^e11b10a11c11
     cprintf("write Virt Page d in exclock_check_swap\n");
     *(unsigned char *)0x4000 = 0x0d;
-    assert(pgfault_num==8);    // 00:AW, e*00d11^a01c01
+    assert(pgfault_num==8);    // e*00d11^a01c01
     cprintf("read Virt Page e in exclock_check_swap\n");
     assert(*(unsigned char *)0x5000 == 0x0e);
-    assert(pgfault_num==8);    // 00:AW, e*10d11^a01c01
+    assert(pgfault_num==8);    // e*10d11^a01c01
     cprintf("write Virt Page b in exclock_check_swap\n");
     *(unsigned char *)0x2000 = 0x0b;
-    assert(pgfault_num==9);   // 00:AW, e*00d01b11^c*00
+    assert(pgfault_num==9);   // e*00d01b11^c*00
     cprintf("write Virt Page a in exclock_check_swap\n");
     *(unsigned char *)0x1000 = 0x0a;
     assert(pgfault_num==10);
