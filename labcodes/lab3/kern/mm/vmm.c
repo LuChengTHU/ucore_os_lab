@@ -8,9 +8,9 @@
 #include <x86.h>
 #include <swap.h>
 
-/* 
+/*
   vmm design include two parts: mm_struct (mm) & vma_struct (vma)
-  mm is the memory manager for the set of continuous virtual memory  
+  mm is the memory manager for the set of continuous virtual memory
   area which have the same PDT. vma is a continuous virtual memory area.
   There a linear link list for vma & a redblack link list for vma in mm.
 ---------------
@@ -145,7 +145,7 @@ mm_destroy(struct mm_struct *mm) {
     list_entry_t *list = &(mm->mmap_list), *le;
     while ((le = list_next(list)) != list) {
         list_del(le);
-        kfree(le2vma(le, list_link),sizeof(struct vma_struct));  //kfree vma        
+        kfree(le2vma(le, list_link),sizeof(struct vma_struct));  //kfree vma
     }
     kfree(mm, sizeof(struct mm_struct)); //kfree mm
     mm=NULL;
@@ -162,7 +162,7 @@ vmm_init(void) {
 static void
 check_vmm(void) {
     size_t nr_free_pages_store = nr_free_pages();
-    
+
     check_vma_struct();
     check_pgfault();
 
@@ -221,7 +221,7 @@ check_vma_struct(void) {
     for (i =4; i>=0; i--) {
         struct vma_struct *vma_below_5= find_vma(mm,i);
         if (vma_below_5 != NULL ) {
-           cprintf("vma_below_5: i %x, start %x, end %x\n",i, vma_below_5->vm_start, vma_below_5->vm_end); 
+           cprintf("vma_below_5: i %x, start %x, end %x\n",i, vma_below_5->vm_start, vma_below_5->vm_end);
         }
         assert(vma_below_5 == NULL);
     }
@@ -387,14 +387,14 @@ do_pgfault(struct mm_struct *mm, uint32_t error_code, uintptr_t addr) {
     *  MACROs or Functions:
     *    swap_in(mm, addr, &page) : alloc a memory page, then according to the swap entry in PTE for addr,
     *                               find the addr of disk page, read the content of disk page into this memroy page
-    *    page_insert ： build the map of phy addr of an Page with the linear addr la
-    *    swap_map_swappable ： set the page swappable
+    *    page_insert : build the map of phy addr of an Page with the linear addr la
+    *    swap_map_swappable : set the page swappable
     */
         if(swap_init_ok) {
             struct Page *page=NULL;
             if (swap_in(mm, addr, &page) != 0) {
                 cprintf("swap_in crashed in do_pgfault\n");
-            }   //(1）According to the mm AND addr, try to load the content of right disk page
+            }   //(1) According to the mm AND addr, try to load the content of right disk page
                 //    into the memory which page managed.
             page_insert(mm->pgdir, page, addr, perm);   //(2) According to the mm, addr AND page, setup the map of phy addr <---> logical addr
             page->pra_vaddr = addr;
