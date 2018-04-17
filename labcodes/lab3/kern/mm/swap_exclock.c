@@ -7,12 +7,14 @@
 #include <list.h>
 
 list_entry_t pra_list_head;
+list_entry_t *pra_list_clock_head;
 
 static int
 _exclock_init_mm(struct mm_struct *mm)
 {
      list_init(&pra_list_head);
      mm->sm_priv = &pra_list_head;
+     pra_list_clock_head = &pra_list_head;
      //cprintf(" mm->sm_priv %x in exclock_init_mm\n",mm->sm_priv);
      return 0;
 }
@@ -22,7 +24,7 @@ _exclock_init_mm(struct mm_struct *mm)
 static int
 _exclock_map_swappable(struct mm_struct *mm, uintptr_t addr, struct Page *page, int swap_in)
 {
-    list_entry_t *head=(list_entry_t*) mm->sm_priv;
+    list_entry_t *head = pra_list_clock_head;
     list_entry_t *entry=&(page->pra_page_link);
 
     assert(entry != NULL && head != NULL);
@@ -39,20 +41,21 @@ _exclock_map_swappable(struct mm_struct *mm, uintptr_t addr, struct Page *page, 
 static int
 _exclock_swap_out_victim(struct mm_struct *mm, struct Page ** ptr_page, int in_tick)
 {
-    list_entry_t *head=(list_entry_t*) mm->sm_priv;
-        assert(head != NULL);
+    assert(pra_list_clock_head != NULL);
     assert(in_tick==0);
     /* Select the victim */
-    list_entry_t *le = list_next(head);
-    assert(le != head);
+    list_entry_t*& le = pra_list_clock_head;
+    assert(le != mm->sm_priv);
     while (1) {
-        if (le == head) le = list_next(le);
+        if (le == mm->sm_priv) le = list_next(le);
         struct Page* page = le2page(le, pra_page_link);
         uintptr_t va = page->pra_vaddr;
         pte_t *ptep = get_pte(mm->pgdir, va, 0);
         assert((*ptep & PTE_P) != 0);
         if ( !(*ptep & PTE_A) && !(*ptep & PTE_D) ) {
+            list_entry_t *next = list_next(le);
             list_del(le);
+            le = next;
             assert(page != NULL);
             *ptr_page = page;
             return 0;
