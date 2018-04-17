@@ -54,6 +54,7 @@ _exclock_swap_out_victim(struct mm_struct *mm, struct Page ** ptr_page, int in_t
         assert((*ptep & PTE_P) != 0);
         if ( !(*ptep & PTE_A) && !(*ptep & PTE_D) ) {
             list_entry_t *next = list_next(clock_head);
+            if (next == mm->sm_priv) next = list_next(next);
             list_del(clock_head);
             clock_head = next;
             assert(page != NULL);
