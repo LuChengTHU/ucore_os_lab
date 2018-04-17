@@ -72,7 +72,7 @@ _fifo_swap_out_victim(struct mm_struct *mm, struct Page ** ptr_page, int in_tick
     while (1) {
         if (le == head) le = list_next(le);
         struct Page* page = le2page(le, pra_page_link);
-        uintptr_t va = page2kva(page);
+        uintptr_t va = page->pra_vaddr;
         pte_t *ptep = get_pte(mm->pgdir, va, 0);
         assert((*ptep & PTE_P) != 0);
         if ( !(*ptep & PTE_A) && !(*ptep & PTE_D) ) {
@@ -83,8 +83,10 @@ _fifo_swap_out_victim(struct mm_struct *mm, struct Page ** ptr_page, int in_tick
         }
         else if ( !(*ptep & PTE_A) && (*ptep & PTE_D) ) {
             *ptep &= ~PTE_D;
-            if (swapfs_write( (page->pra_vaddr/PGSIZE+1)<<8, page) != 0) {
+            if (swapfs_write( (va/PGSIZE+1)<<8, page) != 0) {
                 cprintf("CLOCK_EXTENDED WRITE: failed to save\n");
+            } else {
+                cprintf("CLOCK_EXTENDED WRITE: i %d, store page in vaddr 0x%x to disk swap entry %d\n", i, va, va/PGSIZE+1);
             }
             tlb_invalidate(mm->pgdir, va);
         } else if ( (*ptep & PTE_A) ) {
