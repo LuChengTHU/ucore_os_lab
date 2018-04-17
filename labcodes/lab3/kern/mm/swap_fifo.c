@@ -65,38 +65,7 @@ _fifo_swap_out_victim(struct mm_struct *mm, struct Page ** ptr_page, int in_tick
         assert(head != NULL);
     assert(in_tick==0);
     /* Select the victim */
-    /*LAB3 EXERCISE 2: YOUR CODE*/
-
-    list_entry_t *le = list_next(head);
-    assert(le != head);
-    while (1) {
-        if (le == head) le = list_next(le);
-        struct Page* page = le2page(le, pra_page_link);
-        uintptr_t va = page->pra_vaddr;
-        pte_t *ptep = get_pte(mm->pgdir, va, 0);
-        assert((*ptep & PTE_P) != 0);
-        if ( !(*ptep & PTE_A) && !(*ptep & PTE_D) ) {
-            list_del(le);
-            assert(page != NULL);
-            *ptr_page = page;
-            return 0;
-        }
-        else if ( !(*ptep & PTE_A) && (*ptep & PTE_D) ) {
-            *ptep &= ~PTE_D;
-            if (swapfs_write( (va/PGSIZE+1)<<8, page) != 0) {
-                cprintf("CLOCK_EXTENDED WRITE: failed to save\n");
-            } else {
-                cprintf("CLOCK_EXTENDED WRITE: store page in vaddr 0x%x to disk swap entry %d\n", va, va/PGSIZE+1);
-            }
-            tlb_invalidate(mm->pgdir, va);
-        } else if ( (*ptep & PTE_A) ) {
-            *ptep &= ~PTE_A;
-            tlb_invalidate(mm->pgdir, va);
-        }
-        le = list_next(le);
-    }
-
-    /*
+    /*LAB3 EXERCISE 2: YOUR CODE*/ 
     //(1)  unlink the  earliest arrival page in front of pra_list_head qeueue
     list_entry_t *first_item = head->prev;
     assert(head != first_item);
@@ -106,7 +75,6 @@ _fifo_swap_out_victim(struct mm_struct *mm, struct Page ** ptr_page, int in_tick
     assert(page != NULL);
     *ptr_page = page;
     return 0;
-    */
 }
 
 static int
