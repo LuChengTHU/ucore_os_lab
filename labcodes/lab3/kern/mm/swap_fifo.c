@@ -69,7 +69,7 @@ _fifo_swap_out_victim(struct mm_struct *mm, struct Page ** ptr_page, int in_tick
 
     list_entry_t *le = head->next;
     assert(le != head);
-    while (true) {
+    while (1) {
         if (le == head) le = list_next(le);
         struct Page* page = le2page(le, pra_page_link);
         uintptr_t va = page2kva(page);
