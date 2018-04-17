@@ -39,7 +39,7 @@ swap_init(void)
      }
 
 
-     sm = &swap_manager_exclock;
+     sm = &swap_manager_fifo;
      int r = sm->init();
 
      if (r == 0)
